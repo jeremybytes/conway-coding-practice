@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Conway.Library
 {
@@ -31,9 +32,41 @@ namespace Conway.Library
                 for (int j = 0; j < gridWidth; j++)
                 {
                     var liveNeighbors = GetLiveNeighbors(i, j);
-                    nextState[i, j] = 
+                    nextState[i, j] =
                         LifeRules.GetNewState(CurrentState[i, j], liveNeighbors);
                 }
+
+            CurrentState = nextState;
+            nextState = new CellState[gridHeight, gridWidth];
+        }
+
+        public void UpdateState2()
+        {
+            Parallel.For(0, gridHeight, i =>
+            {
+                Parallel.For(0, gridWidth, j =>
+                {
+                    var liveNeighbors = GetLiveNeighbors(i, j);
+                    nextState[i, j] =
+                        LifeRules.GetNewState(CurrentState[i, j], liveNeighbors);
+                });
+            });
+
+            CurrentState = nextState;
+            nextState = new CellState[gridHeight, gridWidth];
+        }
+
+        public void UpdateState3()
+        {
+            Parallel.For(0, gridHeight, i =>
+                {
+                    for (int j = 0; j < gridWidth; j++)
+                    {
+                        var liveNeighbors = GetLiveNeighbors(i, j);
+                        nextState[i, j] =
+                            LifeRules.GetNewState(CurrentState[i, j], liveNeighbors);
+                    }
+                });
 
             CurrentState = nextState;
             nextState = new CellState[gridHeight, gridWidth];
@@ -55,8 +88,8 @@ namespace Conway.Library
         private int GetLiveNeighbors(int positionX, int positionY)
         {
             int liveNeighbors = 0;
-            for(int i = -1; i <= 1; i++)
-                for(int j = -1; j <= 1; j++)
+            for (int i = -1; i <= 1; i++)
+                for (int j = -1; j <= 1; j++)
                 {
                     if (i == 0 && j == 0)
                         continue;
